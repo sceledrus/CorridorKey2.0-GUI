@@ -24,7 +24,7 @@ Drop in your clip, tune the settings with sliders and menus, press **Run**. No c
 - [Settings reference](#settings-reference)
 - [Requirements](#requirements)
 - [Privacy](#privacy)
-- [Honest limits](#honest-limits)
+- [Limitations](#Limitations)
 - [Repository layout](#repository-layout)
 - [Credits and licence](#credits-and-licence)
 
