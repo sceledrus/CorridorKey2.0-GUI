@@ -1,657 +1,268 @@
-# CorridorKey 2.0 GUI
-```
-Welcome to CorridorKey 2.0! You may rest easy, weary artist. The green beast has been slain. The CorridorKey 2.0 model was designed and trained by Zachary Harris, in direct collaboration with Niko and Corridor Digital.
+# CorridorKey 2.0 — Unofficial GUI
 
-# Check out our official plugin!
+![version](https://img.shields.io/badge/version-0.3.0-blue)
+![platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
+![licence](https://img.shields.io/badge/licence-Corridor%20Key%20Licence%202.0-orange)
+![privacy](https://img.shields.io/badge/telemetry-none-brightgreen)
 
-The most requested feature we've heard this year- "Can you make a plugin for my favorite software?
+**A point-and-click desktop front-end for [CorridorKey 2.0](https://corridorkey.com), the AI green-screen keyer from Corridor Digital.**
+Drop in a clip, tune the settings with sliders and menus, press **Run**. No command line, no typing flags, no accounts.
 
-...yes! Finally!
-
-Led by Ale Alvaro, we now have a plugin (and stand-alone app) available for almost every media software package. A one-time purchase gets you access to ALL OF THEM.
-**[corridorkey.com](https://corridorkey.com)**
-
-...And for those of you that want to experiment, tinker, and build your own python tools, welcome to the CorridorKey 2.0 repo! You may use this model and software freely, for commercial or personal work. See the license for more details, but that's it in a nutshell. Enjoy!
-
-Any business or research inquiries for Zac can be directed to z.brooks.harris@gmail.com
+> Vibecoded by [Sceledrus](https://www.youtube.com/channel/UCfbv9irTqrpZehCk8V4OvZQ) using Claude Sonnet 5.5.
+> This is an unofficial community project. It is **not affiliated with or endorsed by Corridor Digital.**
 
 
-## Setup
+## Contents
 
-You need an NVIDIA GPU (currently RTX 30-series or newer) with at least 4 GB of VRAM
-for footage up to 1440p, or 6 GB for 4K, `ffmpeg` on your PATH, and a Python
-environment with CUDA-enabled PyTorch installed. On smaller cards, see [Long Clips And Low VRAM](#long-clips-and-low-vram).
-This package was tested with:
+- [What this is](#what-this-is)
+- [What you can do with it](#what-you-can-do-with-it)
+- [Command line vs. this GUI](#command-line-vs-this-gui)
+- [Install](#install)
+- [Quick start](#quick-start)
+- [Window layout](#window-layout)
+- [Keyboard shortcuts](#keyboard-shortcuts)
+- [Settings reference](#settings-reference)
+- [Themes](#themes)
+- [Requirements](#requirements)
+- [Privacy](#privacy)
+- [Honest limits](#honest-limits)
+- [Repository layout](#repository-layout)
+- [Credits and licence](#credits-and-licence)
 
-```
-torch==2.9.1
-torchvision==0.24.1
-```
+---
 
-From the repository root, create an environment, install PyTorch and the
-remaining dependencies, and download the model weights (about 5 GB):
+## What this is
 
-```
-python -m venv venv
-source venv/bin/activate
-pip install torch==2.9.1 torchvision==0.24.1 --index-url https://download.pytorch.org/whl/cu128
-pip install -r requirements.txt
-python scripts/download_weights.py
-```
+CorridorKey 2.0 is run from the command line through `infer.py`. This project wraps that script in a normal desktop
+window. Every time you press **Run**, the GUI builds the same command you would have typed and runs the official
+`infer.py` as a separate process. The GUI never loads the AI model itself, so the keying results are exactly what the
+command line would give you. The exact command of every job is printed at the top of its log, so you can always see
+(and copy) what was run.
 
-The download script fetches:
+Think of it as a dashboard: the engine is untouched, you just get a cockpit.
 
-- the CorridorKey 2.0 weights from
-  [Hugging Face](https://huggingface.co/nikopueringer/CorridorKey2.0) into
-  `weights/`
-- the three frozen foundation models CorridorKey builds on, from their original
-  publishers, into `vfms/`: C-RADIOv4-SO400M (NVIDIA), MoGe-2 ViT-B
-  (Microsoft), and RVM small (Google DeepMind)
+## What you can do with it
 
-After that everything loads from those local folders.
+### Key footage without touching a terminal
+- **Import** a video file, a folder of frames (EXR, PNG, JPG), or a whole folder of clips by dropping them on the window.
+- **Queue** as many clips as you like and run the selected one or all of them in one go. Stop at any time.
+- **Per-clip settings**, plus an *Apply to all clips* button when you want one look across a batch.
+- Companion hint files sitting next to a clip are detected automatically.
 
-## Drag-And-Drop Launcher
+### Control every setting `infer.py` offers
+- **Hint modes**: none, first-frame image, hint video, or the built-in Subject Marker (below).
+- **Despill strength**, colour space, linear-light cutout, and model scale.
+- **GPU memory**: automatic, or manual control (window and stride, low-VRAM mode, cache folder, stage-2 batch size).
+- **Frame range**: process a short test section before committing to the full clip.
+- **Outputs**: foreground, matte, composite and cutout, as video or as EXR sequences.
+- **Video encoding**: quick profiles (default, high quality, small files, compatible 8-bit, H.265), codec, constant-quality or
+  target-bitrate rate control, preset, pixel format, ffmpeg threads, and the frame rate for numbered-frame folders.
 
-The easiest way to run CorridorKey is to drag a clip, a frame-sequence folder,
-or a folder of clips onto the launcher in the repository root:
+### Review your results properly
+- **Dual viewer** with Input, Hint, FG, Matte, Comp and Proc tabs, an **A/B wipe**, and pan/zoom that stays linked between views.
+- A **frame scrubber** that shows which frames will be processed and which already have output.
+- A **live console** for each job, with the full command at the top.
 
-- **Windows:** `CorridorKey_DRAG_CLIPS_HERE.bat`
-- **Linux:** `CorridorKey_DRAG_CLIPS_HERE.sh` (or run it in a terminal and drop
-  the clip into the terminal when asked)
+### Subject Marker
+Click the person or object you want to keep (left-click = keep, right-click = remove) and the GUI builds the first-frame hint
+for you. Grow/shrink and softness sliders refine the edge before it is saved. It is a quick way to point the model at the
+right subject without painting a matte by hand. See [Honest limits](#honest-limits) for what it can and cannot do.
 
-It walks you through the inference mode, outputs, and GPU memory profile, then
-runs the job. The launcher uses the `venv` created during setup if it exists.
-It also picks up companion hint files next to the input automatically
-(`<clip>FrameHint.png` for a first-frame hint, `<clip>_AlphaHint.mp4` for a
-full hint video).
+### Help that explains itself
+Hover any section, slider, button or viewer tab and a plain-language tooltip appears **right next to your mouse**, written for
+people new to keying. While you drag a slider or change a dropdown, the tooltip also adds a *"Right now:"* sentence that explains
+what your current value does. Prefer a quiet interface? Switch it off in Settings.
 
-You can also start the same guided session directly:
+### Hand the result to your compositor
+- **Nuke**: *File > Send Results to Nuke (.nk)* writes a script that creates Read nodes for the outputs you made, a Premult after the
+  cutout, and a note on how to merge it over your background.
+- **After Effects**: *File > Send Results to After Effects (.jsx)* writes a script that imports the outputs into a project folder and
+  builds a correctly sized comp, with the matte set up as a track matte when there is no cutout.
+- Both scripts only create nodes and layers. They never modify or delete your files.
 
-```
-python run_interactive.py /path/to/clip.mp4
-```
+### Make it yours
+- **Dark**, **Light** and a **Custom theme maker**: pick six colours and every other shade is worked out for you, with import and export.
+- A **"done" sound** when the queue finishes: four built-in chimes, or your own audio file. On or off.
 
-## Quick Start
+## Command line vs. this GUI
 
-From the repository root:
+| | Command line (`infer.py`) | This GUI |
+|---|---|---|
+| Starting a job | Type a command with flags | Press **Run** |
+| Learning what a setting does | Read the docs | Hover it |
+| Several clips | Script it yourself | Drop them in, **Run all** |
+| Seeing the result | Open files elsewhere | Built-in viewer with A/B wipe and scrubber |
+| Choosing a subject | Prepare a hint image yourself | Click it (Subject Marker) |
+| Encoding choices | Remember the flags | Menus and profiles |
+| Getting into Nuke / After Effects | Set up the shot by hand | One menu item writes the script |
+| Result quality | Official engine | Identical (same engine, same flags) |
 
-```
-python infer.py \
-  --input /path/to/input.mp4 \
-  --output_dir /path/to/output
-```
+## Install
 
-This runs native-resolution inference with no external hint. By default it
-writes:
+You need **CorridorKey 2.0 working first** (NVIDIA GPU with CUDA-enabled PyTorch, the model weights, and `ffmpeg`). Follow
+Corridor Digital's own instructions for that. This GUI is an add-on that lives inside the same folder.
 
-- `alpha`: predicted matte as a video preview.
-- `fg`: predicted foreground RGB as a video preview.
+### Windows (recommended)
 
-Native resolution is always preserved. The model reflect-pads internally to its
-required shape quantum and crops back to the original size for output.
+1. Open the **[Releases](../../releases)** page and download `CorridorKey2-<version>-launcher.zip`.
+   Optionally compare it with `SHA256SUMS.txt` from the same release.
+2. Extract it **into your CorridorKey folder** (the one that contains `infer.py`).
+3. Double-click **`CorridorKey2.exe`**.
 
-## Choosing An Inference Mode
+If PySide6 (the window toolkit) is missing, the launcher asks first and then installs only that. Nothing else is installed and
+nothing happens without your yes.
 
-CorridorKey can run with no hints, a single first-frame hint, or a full hint
-video. The right mode depends on what information you have and how much you want
-the model to decide for itself.
+> **"Windows protected your PC"?** The exe is not code-signed (certificates cost money and this is a free hobby project).
+> Click **More info > Run anyway**. If you would rather not, read the source in `launcher/launcher.c`, rebuild it yourself, or
+> skip the exe and run `python run_gui.py` from your CorridorKey environment.
 
-### No Hint
+### Standalone window (optional)
 
-```
-python infer.py \
-  --input shot.mp4 \
-  --output_dir out_no_hint
-```
+`CorridorKey2-<version>-standalone-win64.zip` packs the window into a normal Windows program that opens without Python.
+The AI model still runs in your existing CorridorKey environment (it needs several GB of PyTorch and weights that cannot fit in
+an exe), so extract this one **inside your CorridorKey folder** as well. It is built automatically by GitHub Actions from this
+repository. If it misbehaves, use the launcher zip instead.
 
-Use this when no matte or object hint is available. The model decides what the
-foreground subject is.
-
-Tradeoffs:
-
-- Fastest setup because no hint asset is needed.
-- Useful for quick tests and simple shots.
-- Less controlled when multiple plausible subjects are present.
-- The model may make a different subject-selection decision than you intended.
-
-### First-Frame Hint
-
-```
-python infer.py \
-  --input shot.mp4 \
-  --output_dir out_frame1_hint \
-  --hint_first_frame frame_0001_matte.png \
-  --hint_quality 0.95
-```
-
-Use this when you can provide a good matte for the first frame. The hint should
-be a single-channel matte or an image with an alpha channel: white means subject,
-black means background.
-
-By default, Hann carry is enabled. This means the model uses its own predicted
-auxiliary matte from overlapping Hann windows as a continuing hint signal after
-the first explicit hint.
-
-Tradeoffs:
-
-- Usually the best practical mode when only a starting matte is available.
-- Gives the model a clear object identity at the beginning of the shot.
-- Can track through time without requiring a full hint video.
-- Can drift if the shot is long, crowded, or has large occlusions.
-- Larger Hann windows can improve continuity but cost more VRAM.
-
-### Full Hint Video
+### Linux and macOS
 
 ```
-python infer.py \
-  --input shot.mp4 \
-  --output_dir out_full_hint \
-  --hint_video hint_matte_video.mp4 \
-  --hint_quality 0.95
+pip install -r requirements-gui.txt     # into the same environment you use for CorridorKey
+python run_gui.py
 ```
 
-Use this when you have a matte, roto pass, garbage matte, or other subject hint
-for every frame.
+### Uninstalling
 
-Tradeoffs:
+Delete the files you extracted (`CorridorKey2.exe`, `run_gui.py`, the `ck2_gui` folder, and so on). To also remove the GUI's
+settings, delete `%APPDATA%\CorridorKey2-GUI\` (Linux: `~/.config/CorridorKey2-GUI/`). Your clips and results are stored
+elsewhere and are never touched by this.
 
-- Most controlled mode.
-- Best when an external tool or artist pass already knows the intended subject.
-- The output will tend to follow systematic bias in the hint, so a hint that is
-  too eroded, too dilated, or attached to the wrong subject can steer the result
-  in that direction.
-- If you want the full hint video to be used directly on every pass, add
-  `--no_carry_hint`. Otherwise, carried model hints are used on overlapping
-  frames while explicit hints are still used for non-carried frames.
+## Quick start
 
-### Full Hint Video Without Carry
+1. **Import**: drop a clip, a frame folder, or a folder of clips onto the window.
+2. **Pick a clip** in the tray at the bottom and adjust the panel on the right. Hover anything you are unsure about.
+3. *(Optional)* Set **Hint** to *Subject Marker*, press **PLACE MARKERS**, and click the subject in the viewer.
+4. Press **RUN INFERENCE** (`Ctrl+R`), or **RUN ALL** (`Ctrl+Shift+R`) for the whole queue.
+5. **Review** with the viewer tabs and the A/B wipe.
+6. *(Optional)* **File > Send Results to Nuke / After Effects**.
 
-```
-python infer.py \
-  --input shot.mp4 \
-  --output_dir out_full_hint_no_carry \
-  --hint_video hint_matte_video.mp4 \
-  --hint_quality 0.95 \
-  --no_carry_hint
-```
+Tip: try a short frame range first. A few seconds of footage tells you whether the settings are right before you commit to the full clip.
 
-Use this when the hint video is authoritative and you do not want the model's
-previous-window predictions to feed back as hints.
-
-Tradeoffs:
-
-- More literal use of the provided hint video.
-- Avoids feedback from an imperfect carried prediction.
-- Gives up one of the temporal stabilization mechanisms used by the default
-  setup.
-
-## Hint Quality
-
-`--hint_quality` tells the model how much to trust an explicit hint. It does not
-change the hint image itself; it changes the conditioning value supplied to the
-model.
-
-Practical values:
-
-- `0.95`: high-quality matte or artist-provided hint.
-- `0.75`: rough but useful automated hint.
-- `0.50` or below: loose hint, weak scribble-like mask, or unreliable source.
-
-For carried Hann hints, use `--carry_hint_quality`. The default is `0.95`.
+## Window layout
 
 ```
-python infer.py \
-  --input shot.mp4 \
-  --output_dir out_frame1_hint \
-  --hint_first_frame frame_0001_matte.png \
-  --hint_quality 0.95 \
-  --carry_hint_quality 0.95
+┌──────────────────────────────────────────────────────────────────────┐
+│  CORRIDORKEY 2.0      GPU / VRAM meter                               │
+├──────────┬───────────────────────────────────────────┬───────────────┤
+│  Queue   │   Input viewer        │   Result viewer   │  Parameter    │
+│  rail    │   (INPUT / HINT)      │   (FG / MATTE /   │  panel        │
+│          │                       │    COMP / PROC)   │  (Hint, GPU,  │
+│          │                       │                   │  Output, ...) │
+├──────────┴───────────────────────────────────────────┴───────────────┤
+│  Frame scrubber                                                      │
+├──────────────────────────────────────────────────────────────────────┤
+│  Input clips tray                    │  Export tray                  │
+├──────────────────────────────────────────────────────────────────────┤
+│  Status bar                                                          │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
-If a Hann window has no hints at all, the model receives the no-hint signal and
-is asked to decide the subject. If a window has at least one hinted frame,
-unhinted frames in that same window receive quality zero, meaning "there is a
-hinted subject in this window, but this frame does not have its own explicit
-hint."
+- **Queue rail**: the jobs waiting, running and finished.
+- **Viewers**: your source on the left, the result on the right, with linked pan and zoom.
+- **Parameter panel**: collapsible sections, one per group of settings.
+- **Scrubber**: yellow bracket = frames that will be processed; yellow line = frames that already have output.
 
-## Hann Windows
+## Keyboard shortcuts
 
-Stage 1 runs on overlapping temporal windows and combines its hidden states with
-a Hann-style taper. Stage 2 then streams the final full-resolution predictions
-from those combined hidden states.
+| Key | Action |
+|---|---|
+| `Ctrl+R` | Run the selected clip(s) |
+| `Ctrl+Shift+R` | Run every ready clip |
+| `Esc` | Stop |
+| `F1` – `F6` | Switch viewer tab: Input, Hint, FG, Matte, Comp, Proc |
+| `A` | A/B wipe |
+| `F12` | Show the console / job log |
+| Middle-click a slider | Reset it to its default |
 
-By default the window size is chosen automatically for each clip from the
-free memory on your GPU and the clip's resolution, using the largest window
-that fits (from `80/40` down to a single frame). The chosen values are printed at the start of the
-run and saved in the settings log. To set them yourself:
+## Settings reference
 
-```
---hann_chunk 80 --hann_stride 40
-```
+| Panel section | What it controls |
+|---|---|
+| Hint | None, first-frame image, hint video, or Subject Marker; hint quality and how it carries forward |
+| Subject Marker | Your clicks, grow/shrink, edge softness |
+| Inference | Colour space, despill, linear-light cutout, model scale |
+| GPU Memory | Automatic or manual window/stride, low-VRAM mode, cache folder, stage-2 batch |
+| Frame Range | How many frames, where to start, random seed |
+| Output | FG / Matte / Comp / Cutout; video or EXR; EXR bit depth |
+| Video Encoding | Profile, codec, quality or bitrate, preset, pixel format, threads, frame rate |
 
-Passing `--hann_chunk` or `--low_vram` turns automatic selection off.
+**Settings dialog**: General (paths, help on/off, settings folder), Appearance (themes), Sound (done chime).
+The full panel-to-flag mapping is in the [user guide](docs/GUIDE.md).
 
-What the settings mean:
+## Themes
 
-- `hann_chunk`: number of frames processed together by stage 1.
-- `hann_stride`: distance between consecutive stage-1 windows.
-- `80/40`: 50 percent overlap, the high-context maximum for a high-memory
-  workstation GPU.
-- `8/4`: lower VRAM and shorter temporal context, sometimes useful for memory
-  pressure or quick testing.
-- `1/1`: no stage-1 temporal window at all; each frame is keyed on its own.
-  The lowest-memory setting.
-- `48/24` or `24/12`: smaller alternatives if `80/40` is too heavy on a
-  particular machine.
-- Larger windows: often better temporal continuity, higher peak VRAM, more
-  latency.
-- Smaller windows: lower peak VRAM, weaker long-range temporal consistency.
-- `96/48` was not stable at native 4K on the tested 96 GB card; `80/40`
-  completed but used most of the available VRAM.
+| Light | Theme maker |
+|---|---|
+| ![Light theme](docs/screenshots/theme-light.png) | ![Theme maker](docs/screenshots/theme-maker.png) |
 
-Example:
+## Requirements
 
-```
-python infer.py \
-  --input shot.mp4 \
-  --output_dir out_window_8 \
-  --hann_chunk 8 \
-  --hann_stride 4
-```
+| | |
+|---|---|
+| **CorridorKey 2.0** | Installed and working (weights, CUDA PyTorch, ffmpeg on PATH) |
+| **To run the GUI** | Python 3.10 – 3.12 with PySide6-Essentials, OpenCV and NumPy (`requirements-gui.txt`) |
+| **Operating system** | Windows 10/11 (launcher and standalone exe); Linux and macOS via `python run_gui.py` |
+| **GPU** | Whatever CorridorKey 2.0 itself needs; the GUI adds no GPU load of its own |
 
-## Outputs
+*Help > System Check* inspects your setup and tells you what is missing.
 
-Default outputs are `alpha` and `fg`.
+## Privacy
 
-Available output choices:
+- **No telemetry, no accounts, no analytics, no update checks.** The window makes no network connections.
+- The only network use anywhere is the optional `pip install PySide6-Essentials` that the launcher offers, after you say yes.
+- The only link in the program is the author's name in *Help > About*, and it opens your browser only if you click it.
+- Settings, sessions and logs stay on your computer in `%APPDATA%\CorridorKey2-GUI\`.
+- `crash.log` and **System Check > COPY FOR A BUG REPORT** remove your account name from folder paths so they are safer to paste into a
+  public issue. File and clip names are not changed, so skim them first.
+- Release files are built by GitHub's servers from the source in this repository, not on a personal PC.
 
-- `alpha`: matte preview.
-- `fg`: raw foreground RGB prediction preview.
-- `checker`: predicted foreground composited over a checkerboard with customizable despill applied.
-- `cutout`: predicted foreground multiplied by predicted alpha (un-premultiplied straight color, despilled).
+See [SECURITY.md](SECURITY.md) for how to report a problem privately.
 
-`raw_fg` and `foreground` are accepted aliases for `fg`.
+## Honest limits
 
-Select outputs explicitly:
+- Built and tested by one person with an AI assistant. The window and launcher were tested on Windows and on headless Linux.
+- **The Nuke and After Effects scripts have not been run inside those programs.** They follow the documented formats and only create
+  nodes and layers, so treat them as a convenience that may need a small fix in your version.
+- **Subject Marker is a rough hint, not a hard cut.** It uses classic image segmentation (OpenCV GrabCut), which struggles with hair,
+  motion blur and subjects that match the background colour. It only affects the first processed frame, because that is the only hint
+  `infer.py` accepts; the model carries it forward. For exact control on every frame, supply your own hint video.
+- There is no live preview and no in/out markers: CorridorKey 2.0 runs as a streaming pipeline, so each job reloads the model.
+- Previews are 8-bit display images. EXR files are tone-mapped for viewing only; files on disk are never modified.
+- The completion sound has not been checked on every sound card.
 
-```
-python infer.py \
-  --input shot.mp4 \
-  --output_dir out_review \
-  --outputs alpha fg checker cutout
-```
-
-Performance note: each additional output requires more GPU rendering work and
-more ffmpeg encoding. For fastest normal use, keep the default `alpha fg`. Add
-`checker` or `cutout` for review renders.
-
-### Despill Strength
-
-Use `--despill_strength` (value from `0.0` for no despill to `1.0` for full despill, defaults to `0.5`) to configure the despill amount applied to the `checker` and `cutout` outputs.
+## Repository layout
 
 ```
-python infer.py \
-  --input shot.mp4 \
-  --output_dir out_despill \
-  --outputs checker cutout \
-  --despill_strength 0.75
+ck2_gui/                the GUI (window, themes, help text, hint maker, sound, exports)
+run_gui.py              starts the GUI (also: --check, --selftest)
+launcher/               source of the small Windows launcher exe
+build_exe.py / .bat     builds the standalone window exe
+tests/                  tests that run without a GPU
+docs/                   user guide and screenshots
+requirements-gui.txt    the GUI's three Python dependencies
+.github/workflows/      the build-and-release automation
 ```
 
-### Cutout Linear
-
-By default, the straight color for the `cutout` output is in sRGB color space. If you want to export the cutout as straight scene-linear RGB instead of sRGB (common for linear VFX compositing pipelines), pass:
-
-```
---cutout_linear
-```
-
-`--stage2_batch` controls how many final-resolution frames are run and rendered
-together in stage 2. The default is `1`, which uses the least memory and was
-no slower than larger batches in our tests.
-
-- Higher values use more VRAM in stage 2, most noticeably at 4K.
-- At 4K, stage 1 is usually the practical peak-memory path, so Hann window size
-  often matters more than `--stage2_batch`.
-
-## HDR EXR Output
-
-By default, all outputs are ffmpeg-encoded preview videos. That path is
-display-referred: values are clipped to `[0, 1]` and quantized for video
-encoding (10-bit `yuv444p10le` x264 for `alpha`/`fg`/`checker`, ProRes 4444
-for `cutout`). HDR values above 1.0 do not survive the video path.
-
-For full HDR float output, pass:
-
-```
---output_format exr
-```
-
-Each selected output is then written as an OpenEXR image sequence in its own
-subdirectory of the output directory (e.g. `<clip>_fg_exr/fg_000000.exr`),
-instead of a video file:
-
-- `fg`, `cutout`, and `checker` color is unclamped scene-linear RGB. Values
-  above 1.0 and negative values predicted by the model are preserved.
-- `alpha` is a single-channel matte, clamped to `[0, 1]` (a matte is
-  display-independent coverage, not HDR data).
-- `cutout` is straight (un-premultiplied) linear RGB plus alpha in one RGBA
-  EXR. `--cutout_linear` is irrelevant here: EXR output is always scene-linear.
-- `--despill_strength` applies to `cutout` and `checker` as usual, computed in
-  linear light.
-
-EXR pixel type defaults to `half` (float16, the VFX interchange standard).
-Half cannot represent values above 65504, so half output is clamped to the
-finite float16 range to avoid `inf` pixels. For extreme HDR values or full
-float32 files, pass:
-
-```
---exr_dtype float
-```
-
-Effective precision note: the network itself runs in bfloat16 (in the asinh
-HDR domain), which bounds output accuracy to roughly 1–2% relative error
-through most of the HDR range regardless of the EXR pixel type. `half` adds
-at most ~0.05% on top of that; `float` adds none.
-
-Typical HDR round trip from linear EXR plates:
-
-```
-python infer.py \
-  --input /path/to/linear_exr_frames \
-  --frame_dir_linear \
-  --frame_dir_fps 24 \
-  --output_format exr \
-  --outputs alpha fg cutout \
-  --output_dir out_hdr
-```
-
-Note that `--frame_dir_linear` matters on the input side: without it, EXR
-frames are treated as display-coded and clipped to `[0, 1]` before the model
-sees them. The runtime prints a warning if EXR input is read without the flag.
-The ffmpeg encoding options below only apply to `--output_format video`.
-
-## Video Encoding
-
-Outputs are written through ffmpeg. Defaults:
-
-```
---ffmpeg_codec libx264 --crf 12 --preset medium --pix_fmt yuv444p10le
-```
-
-Bit depth in the video path: frames are rendered in fp32 and piped to ffmpeg
-as 16-bit raw video. The x264 preview outputs default to 10-bit 4:4:4
-(`yuv444p10le`); pass `--pix_fmt yuv444p` if a playback target needs 8-bit
-H.264. The `cutout` output is always ProRes 4444 with alpha, encoded from
-10-bit input (decodes as 12-bit `yuva444p12le`). Video containers remain
-display-referred and clipped to [0, 1] — use `--output_format exr` for
-unclipped HDR.
-
-Override these as needed for your pipeline. For example:
-
-```
-python infer.py \
-  --input shot.mp4 \
-  --output_dir out_encoded \
-  --ffmpeg_codec libx264 \
-  --crf 10 \
-  --preset slow \
-  --pix_fmt yuv444p
-```
-
-## Long Clips And Low VRAM
-
-You normally do not need to set anything here: with no memory flags,
-CorridorKey measures the free memory on your GPU and picks the Hann window and
-low-VRAM mode for each clip. As a guide, this is roughly what it selects
-(window as chunk/stride):
-
-| GPU memory | 720p | 1080p | 1440p | 4K |
-|---|---|---|---|---|
-| 4 GB | 4/2 low-VRAM | 2/1 low-VRAM | 1/1 low-VRAM | not enough memory |
-| 6 GB | 24/12 low-VRAM | 8/4 low-VRAM | 4/2 low-VRAM | 2/1 low-VRAM |
-| 8 GB | 24/12 low-VRAM | 8/4 low-VRAM | 8/4 low-VRAM | 4/2 low-VRAM |
-| 12 GB | 80/40 low-VRAM | 24/12 low-VRAM | 8/4 | 8/4 low-VRAM |
-| 16 GB | 80/40 | 48/24 low-VRAM | 24/12 low-VRAM | 8/4 low-VRAM |
-| 24 GB | 80/40 | 48/24 | 48/24 low-VRAM | 8/4 |
-| 32 GB | 80/40 | 80/40 | 48/24 | 24/12 |
-| 48 GB | 80/40 | 80/40 | 80/40 | 48/24 low-VRAM |
-
-On small cards it goes down to windows of only a few frames, or a single
-frame, which gives up temporal context in stage 1 to save memory. Results
-remain good, with somewhat less frame-to-frame consistency than larger windows.
-
-These come from measurements on synthetic test clips; other software using the
-GPU reduces what is available. If you hit a CUDA out-of-memory error, pass
-`--low_vram` with a smaller `--hann_chunk` yourself.
-
-The normal path streams video and does not intentionally hold an entire long
-clip in RAM. To force low-VRAM mode yourself, add:
-
-```
-python infer.py \
-  --input long_shot.mp4 \
-  --output_dir out_low_vram \
-  --low_vram \
-  --temp_dir /path/with/free/space
-```
-
-Low-VRAM mode is exact staged inference:
-
-- RVM still runs chronologically through the clip with continuous recurrent
-  state.
-- C-RADIO and MoGe features are precomputed to temporary memmaps.
-- Stage 1 runs Hann windows.
-- Stage 2 streams final frames.
-
-Tradeoffs:
-
-- Lower peak VRAM.
-- More disk I/O and temporary storage.
-- Usually slower.
-- Use a temp directory with enough free space for feature memmaps.
-
-Advanced memory knobs:
-
-- `--low_vram_foundation_chunk`: number of frames per VFM precompute chunk.
-- `--low_vram_enc_frame_chunk`: stage-1 encoder frame chunking.
-- `--low_vram_mlp_chunk_tokens`: MLP token chunking.
-- `--low_vram_swin_window_batch`: Swin/window processing chunking.
-- `--low_vram_full_attn_query_chunk_tokens`: query chunking for full attention.
-
-Use the defaults unless you are actively tuning memory behavior.
-
-## Frame Directories
-
-`--input` can be a video file or a directory of frames. Frame directories are
-read in sorted filename order. Supported extensions are EXR, PNG, JPG, and JPEG.
-
-```
-python infer.py \
-  --input /path/to/frames \
-  --frame_dir_fps 24 \
-  --output_dir out_frames
-```
-
-Frame directories are treated as display-coded by default. If the incoming image sequence is scene-linear RGB (e.g. for linear EXR sequences), pass:
-
-```
---frame_dir_linear
-```
-
-Example:
-
-```
-python infer.py \
-  --input /path/to/linear_exr_frames \
-  --frame_dir_fps 24 \
-  --frame_dir_linear \
-  --output_dir out_exr
-```
-
-## Partial Clips
-
-For quick tests, process only part of a clip:
-
-```
-python infer.py \
-  --input shot.mp4 \
-  --output_dir out_test \
-  --num_frames 100 \
-  --start_mode middle
-```
-
-`--start_mode` choices:
-
-- `begin`: start from the first frame.
-- `middle`: take a centered segment.
-- `random_middle`: choose a deterministic random middle segment using `--seed`.
-
-## Input Color Handling
-
-The runtime does not inspect or convert color metadata. It uses a simple,
-explicit input contract:
-
-- Normal video files are decoded with OpenCV/ffmpeg into RGB values in `[0, 1]`
-  and treated as display-coded sRGB/Rec.709-like footage.
-- PNG/JPG frame directories are treated the same way: display-coded RGB in
-  `[0, 1]`.
-- Frame directories are also treated as display-coded by default.
-- If frames are already scene-linear RGB, pass `--frame_dir_linear`.
-
-For display-coded inputs, the runtime converts RGB to an internal scene-linear
-working value with the package gamma function, then applies the model's signed
-asinh HDR encoding. Model outputs are decoded back through the inverse path for
-video previews.
-
-For `--frame_dir_linear`, the incoming RGB values are passed as scene-linear
-values directly into the model's signed asinh encoding. This is the path to use
-for unclipped linear image sequence workflows (e.g. EXR sequences).
-
-The foundation models are different: C-RADIO, MoGe, and RVM receive SDR-style
-RGB proxies because those models expect normal image-like inputs. They do not
-receive unclipped HDR values.
-
-What this runtime does not currently do:
-
-- It does not automatically convert ACEScg, Rec.2020, LogC, S-Log, V-Log, PQ,
-  HLG, or camera-raw color spaces.
-- It does not use video color metadata to choose a transfer function or primary
-  matrix.
-- It does not preserve HDR values from ordinary encoded video containers unless
-  those values have already been converted into a supported frame input path.
-
-Practical guidance:
-
-- For ordinary sRGB/Rec.709-looking MP4/ProRes review footage, use the video
-  directly.
-- For linear EXR plates, use a frame directory and pass
-  `--frame_dir_linear`.
-- For Log, PQ/HLG, ACEScg, Rec.2020, or other managed-color sources, convert
-  upstream into either display-coded RGB for the video path or scene-linear RGB
-  frames for the linear path.
-
-## Brightness And Contrast Controls
-
-Leave these controls at default for standard inference:
-
-```
---linear_brightness 1.0
---linear_contrast 1.0
---linear_contrast_pivot 0.18
-```
-
-The brightness and contrast options apply an experimental linear-light adjustment
-after display-coded inputs have been converted to linear light and before the
-model's asinh encoding. The inverse adjustment is applied to the predicted
-foreground before writing preview outputs. These controls are useful for
-controlled tests, not for ordinary production use.
-
-## Failure Behavior
-
-The runtime intentionally does not silently switch modes. Missing weights,
-missing foundation assets, missing ffmpeg, unsupported inputs, and load
-mismatches raise errors instead of falling back to a different behavior.
-
-## Common Recipes
-
-No hint, fastest standard outputs:
-
-```
-python infer.py --input shot.mp4 --output_dir out_no_hint
-```
-
-First-frame hint with default carry:
-
-```
-python infer.py \
-  --input shot.mp4 \
-  --output_dir out_frame1 \
-  --hint_first_frame matte_frame_0001.png \
-  --hint_quality 0.95
-```
-
-Full hint video, trusting the provided hint on every pass:
-
-```
-python infer.py \
-  --input shot.mp4 \
-  --output_dir out_full_hint \
-  --hint_video hint.mp4 \
-  --hint_quality 0.95 \
-  --no_carry_hint
-```
-
-Review render with checker and cutout:
-
-```
-python infer.py \
-  --input shot.mp4 \
-  --output_dir out_review \
-  --hint_first_frame matte_frame_0001.png \
-  --outputs alpha fg checker cutout
-```
-
-Lower-memory 8-frame windows:
-
-```
-python infer.py \
-  --input shot.mp4 \
-  --output_dir out_lowmem_window \
-  --hint_first_frame matte_frame_0001.png \
-  --hann_chunk 8 \
-  --hann_stride 4
-```
-
-## Licensing and Permissions
-
-Use CorridorKey for whatever you'd like, including processing footage for
-commercial projects. What you make with it is yours.
-
-- You may not sell this tool, or charge for access to its code or model, and
-  you may not offer it as a paid API or inference service, unless given permission by Corridor Digital.
-- You may build on the code and model, but what you release must be freely
-  accessible, stay under this same license, and keep the CorridorKey name.
-  Donationware and pay-what-you-want are fine.
-- Organizations with more than US $20 million in annual revenue need to
-  purchase a seat of the CorridorKey plugin for each person using this tool.
-  A seat covers both the plugin and this model and software. See
-  [corridorkey.com](https://corridorkey.com).
-- If you run a commercial software package and want to integrate CorridorKey,
-  email contact@corridordigital.com. We're easy to work with.
-
-The full terms are in [LICENSE](LICENSE). The license is a variation of
-[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) with
-additional terms.
-
-## Acknowledgements
-
-CorridorKey builds on three foundation models. Please go show their creators
-some support:
-
-- [C-RADIO](https://github.com/NVlabs/RADIO) by NVIDIA, under the NVIDIA Open
-  Model License
-- [MoGe](https://github.com/microsoft/MoGe) by Microsoft, under the MIT license
-- [RVM](https://github.com/google-deepmind/representations4d) by Google
-  DeepMind, code under Apache 2.0 and weights under CC-BY 4.0
-
-Details are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+This repository is a fork of Corridor Digital's CorridorKey 2.0 repository. The runtime files (such as `infer.py`) come from the
+official project; the GUI adds the files above on top.
+
+## Credits and licence
+
+- **CorridorKey 2.0** is made by **Corridor Digital**; the model was designed and trained by Zachary Harris with Niko and Corridor Digital.
+  Get the official runtime, weights and plugin at [corridorkey.com](https://corridorkey.com).
+- The window layout is inspired by the community Corridor Key 1 GUI. No code from it is used.
+- Licensed under the **Corridor Key Licence 2.0** (CC BY-NC-SA 4.0 plus Corridor Digital's additional terms); the full text is in
+  [LICENSE](LICENSE). In short: free to use, but not to be sold or offered as a paid service, anything built on it stays free under the
+  same licence and keeps the CorridorKey name, and large organisations need the official plugin seat. Read the licence itself, not this summary.
+- Third-party libraries (Qt for Python / PySide6, OpenCV, NumPy, PyInstaller): see [THIRD_PARTY_NOTICES_GUI.md](THIRD_PARTY_NOTICES_GUI.md).
+
+**Found a bug?** [Open an issue](../../issues/new/choose) and please follow the privacy checklist in the template.
