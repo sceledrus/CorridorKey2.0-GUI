@@ -1,5 +1,5 @@
-# CorridorKey 2.0
-
+# CorridorKey 2.0 GUI
+```
 Welcome to CorridorKey 2.0! You may rest easy, weary artist. The green beast has been slain. The CorridorKey 2.0 model was designed and trained by Zachary Harris, in direct collaboration with Niko and Corridor Digital.
 
 # Check out our official plugin!
