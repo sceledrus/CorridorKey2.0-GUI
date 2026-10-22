@@ -6,7 +6,7 @@ Drop in a clip, adjust the settings, press Run. Free, private, and it never touc
 > Vibecoded by [Sceledrus](https://www.youtube.com/channel/UCfbv9irTqrpZehCk8V4OvZQ) using Claude Sonnet 5.5.
 > An unofficial front-end for the CorridorKey 2.0 runtime by Corridor Digital. **Not affiliated with or endorsed by Corridor Digital.**
 
-![CorridorKey 2.0 in Subject Marker mode](docs/screenshots/main-dark.png)
+![CorridorKey 2.0 in Subject Marker mode]
 
 ## What it does
 
