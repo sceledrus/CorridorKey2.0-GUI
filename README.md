@@ -22,7 +22,6 @@ Drop in a clip, tune the settings with sliders and menus, press **Run**. No comm
 - [Window layout](#window-layout)
 - [Keyboard shortcuts](#keyboard-shortcuts)
 - [Settings reference](#settings-reference)
-- [Themes](#themes)
 - [Requirements](#requirements)
 - [Privacy](#privacy)
 - [Honest limits](#honest-limits)
@@ -185,12 +184,6 @@ Tip: try a short frame range first. A few seconds of footage tells you whether t
 
 **Settings dialog**: General (paths, help on/off, settings folder), Appearance (themes), Sound (done chime).
 The full panel-to-flag mapping is in the [user guide](docs/GUIDE.md).
-
-## Themes
-
-| Light | Theme maker |
-|---|---|
-| ![Light theme](docs/screenshots/theme-light.png) | ![Theme maker](docs/screenshots/theme-maker.png) |
 
 ## Requirements
 
