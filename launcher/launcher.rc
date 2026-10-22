@@ -1,0 +1,27 @@
+1 ICON "ck2.ico"
+1 24 "ck2.manifest"
+
+1 VERSIONINFO
+FILEVERSION 0,3,0,0
+PRODUCTVERSION 0,3,0,0
+FILEOS 0x40004
+FILETYPE 1
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904B0"
+    BEGIN
+      VALUE "FileDescription", "CorridorKey 2.0 GUI launcher (unofficial)"
+      VALUE "ProductName", "CorridorKey 2.0"
+      VALUE "FileVersion", "0.3.0"
+      VALUE "ProductVersion", "0.3.0"
+      VALUE "InternalName", "CorridorKey2"
+      VALUE "OriginalFilename", "CorridorKey2.exe"
+      VALUE "Comments", "Starts run_gui.py in the CorridorKey Python environment. Source: launcher/launcher.c"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END
