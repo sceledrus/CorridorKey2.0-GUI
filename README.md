@@ -1,7 +1,7 @@
 # CorridorKey 2.0 — Unofficial GUI
 
 ![version](https://img.shields.io/badge/version-0.3.0-blue)
-![platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
+![platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 ![licence](https://img.shields.io/badge/licence-Corridor%20Key%20Licence%202.0-orange)
 ![privacy](https://img.shields.io/badge/telemetry-none-brightgreen)
 
