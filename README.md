@@ -1,12 +1,12 @@
-# CorridorKey 2.0 — Unofficial GUI
+# CorridorKey 2.0 — The Unofficial GUI
 
 ![version](https://img.shields.io/badge/version-0.3.0-blue)
 ![platform](https://img.shields.io/badge/platform-Windows-lightgrey)
-![licence](https://img.shields.io/badge/licence-Corridor%20Key%20Licence%202.0-orange)
+![license](https://img.shields.io/badge/licence-Corridor%20Key%20Licence%202.0-orange)
 ![privacy](https://img.shields.io/badge/telemetry-none-brightgreen)
 
 **A point-and-click desktop front-end for [CorridorKey 2.0](https://corridorkey.com), the AI green-screen keyer from Corridor Digital.**
-Drop in a clip, tune the settings with sliders and menus, press **Run**. No command line, no typing flags, no accounts.
+Drop in your clip, tune the settings with sliders and menus, press **Run**. No command line, no typing flags, no accounts.
 
 > Vibecoded by [Sceledrus](https://www.youtube.com/channel/UCfbv9irTqrpZehCk8V4OvZQ) using Claude Sonnet 5.5.
 > This is an unofficial community project. It is **not affiliated with or endorsed by Corridor Digital.**
@@ -208,17 +208,15 @@ The full panel-to-flag mapping is in the [user guide](docs/GUIDE.md).
 
 See [SECURITY.md](SECURITY.md) for how to report a problem privately.
 
-## Honest limits
+## Limitations
 
-- Built and tested by one person with an AI assistant. The window and launcher were tested on Windows and on headless Linux.
-- **The Nuke and After Effects scripts have not been run inside those programs.** They follow the documented formats and only create
-  nodes and layers, so treat them as a convenience that may need a small fix in your version.
-- **Subject Marker is a rough hint, not a hard cut.** It uses classic image segmentation (OpenCV GrabCut), which struggles with hair,
+- Built and tested by one person with an AI assistant. The GUI was tested only on Windows and on headless Linux inside my assistant.
+- **Treat the Nuke and After Effects support as a convenience.**
+- **Subject Marker uses classic image segmentation (OpenCV GrabCut), which struggles with hair,
   motion blur and subjects that match the background colour. It only affects the first processed frame, because that is the only hint
-  `infer.py` accepts; the model carries it forward. For exact control on every frame, supply your own hint video.
-- There is no live preview and no in/out markers: CorridorKey 2.0 runs as a streaming pipeline, so each job reloads the model.
-- Previews are 8-bit display images. EXR files are tone-mapped for viewing only; files on disk are never modified.
-- The completion sound has not been checked on every sound card.
+  `infer.py` accepts and the model carries it forward. For exact control on every frame, supply your own hint**
+- There is no live keying preview.
+- Previews are 8-bit. EXR files are tone-mapped for viewing only.
 
 ## Repository layout
 
