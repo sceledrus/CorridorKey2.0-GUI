@@ -99,7 +99,7 @@ what your current value does. Prefer a quiet interface? Switch it off in Setting
 
 ## Install
 
-You need **CorridorKey 2.0 working first** (NVIDIA GPU with CUDA-enabled PyTorch, the model weights, and `ffmpeg`). Follow
+You need [**CorridorKey 2.0 working first**](https://github.com/nikopueringer/CorridorKey2.0) (NVIDIA GPU with CUDA-enabled PyTorch, the model weights, and `ffmpeg`). Follow
 Corridor Digital's own instructions for that. This GUI is an add-on that lives inside the same folder.
 
 ### Windows (recommended)
@@ -123,7 +123,7 @@ The AI model still runs in your existing CorridorKey environment (it needs sever
 an exe), so extract this one **inside your CorridorKey folder** as well. It is built automatically by GitHub Actions from this
 repository. If it misbehaves, use the launcher zip instead.
 
-### Linux and macOS
+### (Untested) Linux and macOS
 
 ```
 pip install -r requirements-gui.txt     # into the same environment you use for CorridorKey
