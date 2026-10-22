@@ -37,3 +37,23 @@ tmp/
 # Local / studio-specific files
 path_mappings.json
 .claude/
+
+# --- GUI additions ---
+build_gui/
+dist/
+*.exe
+*.spec
+.venv/
+env/
+*.log
+weights/
+vfms/
+*.safetensors
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# keep the GUI's images
+!ck2_gui/icon.png
+!docs/screenshots/*.png

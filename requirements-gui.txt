@@ -1,0 +1,5 @@
+# What the CorridorKey window itself needs (the model's own packages stay in requirements.txt).
+# These pins match requirements.txt, so installing this into your CorridorKey venv changes nothing else.
+PySide6-Essentials>=6.6
+opencv-python>=4.11
+numpy>=1.26,<2
