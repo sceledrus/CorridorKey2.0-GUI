@@ -123,18 +123,6 @@ The AI model still runs in your existing CorridorKey environment (it needs sever
 an exe), so extract this one **inside your CorridorKey folder** as well. It is built automatically by GitHub Actions from this
 repository. If it misbehaves, use the launcher zip instead.
 
-### (Untested) Linux and macOS
-
-```
-pip install -r requirements-gui.txt     # into the same environment you use for CorridorKey
-python run_gui.py
-```
-
-### Uninstalling
-
-Delete the files you extracted (`CorridorKey2.exe`, `run_gui.py`, the `ck2_gui` folder, and so on). To also remove the GUI's
-settings, delete `%APPDATA%\CorridorKey2-GUI\` (Linux: `~/.config/CorridorKey2-GUI/`). Your clips and results are stored
-elsewhere and are never touched by this.
 
 ## Quick start
 
